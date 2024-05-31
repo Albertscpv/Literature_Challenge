@@ -1,13 +1,13 @@
 package com.albertdevproyects.literaturechallenge.main;
 
-import com.albertdevproyects.literaturechallenge.models.AuthorsData;
-import com.albertdevproyects.literaturechallenge.models.Books;
-import com.albertdevproyects.literaturechallenge.models.BooksData;
-import com.albertdevproyects.literaturechallenge.models.Data;
+import com.albertdevproyects.literaturechallenge.models.*;
+import com.albertdevproyects.literaturechallenge.repository.AuthorRepository;
 import com.albertdevproyects.literaturechallenge.repository.BookRepository;
 import com.albertdevproyects.literaturechallenge.services.API;
 import com.albertdevproyects.literaturechallenge.services.ConvertData;
+import org.springframework.boot.reactor.ReactorEnvironmentPostProcessor;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -15,9 +15,11 @@ public class Main {
         private API apiQuery = new API();
         private ConvertData convertData = new ConvertData();
         private String url_base = "https://gutendex.com/books/";
-
+        private List<BooksData> booksDataList;
+        private BookRepository repository;
+        private AuthorRepository authorRepository;
         private String menu = """
-                -----------------Welcome to literbry-----------------
+                -----------------Welcome to Literbry-----------------
                 -----------------------------------------------------
                 -----------------------Lobby-------------------------
                 1. Search Books.
@@ -26,6 +28,10 @@ public class Main {
                 4. Search Books by language.
                 5. Exit.
                 """;
+        public Main(AuthorRepository authorRepository, BookRepository repository){
+            this.authorRepository = authorRepository;
+            this.repository = repository;
+        }
 
         public void showMenu(){
             var option = -1;
@@ -40,7 +46,7 @@ public class Main {
                                 break;
                         case 3: showSearchedBooks();
                                 break;
-                        case 4: SearchBooksByLanguage();
+                        case 4: searchBooksByLanguage();
                                 break;
                         case 5:
                             System.out.println("Thanks for use Literbry");
@@ -56,7 +62,7 @@ public class Main {
 
         }
 
-        public Data searchBook(){
+        public Data getDataBook(){
             System.out.println("Type a book to search: ");
             var book = input.nextLine();
             var json = apiQuery.getData(url_base + "?search=" + book.replaceAll("", "+"));
@@ -67,7 +73,57 @@ public class Main {
         }
         private BooksData createBook(Books books, AuthorsData authorsData){
             BooksData booksData = new BooksData(books);
-            return BookRepository.save(booksData);
+            return repository.save(booksData);
+        }
+        private void searchBook(){
+            Data data = getDataBook();
+
+            if(!data.results().isEmpty()){
+                Books books = data.results().get(0);
+                Authors authors = books.authorsList().get(0);
+                BooksData booksDataDB = repository.findByTitle(books.title());
+                if (booksDataDB == null){
+                    AuthorsData authorsData = new AuthorsData(authors);
+                    BooksData booksData = createBook(books, authorsData);
+                    System.out.println(booksData);
+                }else{
+                    AuthorsData authorsDataDB = authorRepository.findByName(authors.name());
+                    if(authorsDataDB == null){
+                        AuthorsData authorsData = new AuthorsData(authors);
+                        authorRepository.save(authorsData);
+                        BooksData booksData = createBook(books, authorsData);
+                        System.out.println(booksDataDB);
+                    }else{
+                        BooksData booksData = createBook(books, authorsDataDB);
+                        System.out.println(booksData);
+                    }
+                }
+            }
+        }
+    private void showSearchedBooks(){
+            booksDataList = repository.findAll();
+            booksDataList.stream().forEach(System.out::println);
+    }
+    private void searchBookByAuthor(){
+        System.out.println("Working in it");
+    }
+    private void searchBooksByLanguage(){
+        System.out.println("Type a language to search: ");
+        System.out.println("Search by encoded language: en, es, pt");
+        var language = input.nextLine();
+
+        if (language == "es"){
+            List<BooksData> booksByLanguage = repository.findByLanguage(language);
+            booksByLanguage.stream().forEach(System.out::println);
+        }if (language == "en"){
+            List<BooksData> booksByLanguage = repository.findByLanguage(language);
+            booksByLanguage.stream().forEach(System.out::println);
+        }if(language == "pt"){
+            List<BooksData> booksByLanguage = repository.findByLanguage(language);
+            booksByLanguage.stream().forEach(System.out::println);
+        }else{
+            System.out.println("Language not found");
         }
 
+    }
 }
