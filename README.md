@@ -1,2 +1,12 @@
-# Literature_Challenge
-Alura Backend challenge.
+
+# Literbry
+
+
+A place to found a especial book. 
+
+```API: Gutendex.com```
+
+### Is a Console app, that works with PostgreSQL to save the data.
+
+
+If something fail let me know about it.
