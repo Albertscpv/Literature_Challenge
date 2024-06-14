@@ -65,11 +65,10 @@ public class Main {
         public Data getDataBook(){
             System.out.println("Type a book to search: ");
             var book = input.nextLine();
-            var json = apiQuery.getData(url_base + "?search=" + book.replaceAll("", "+"));
-            System.out.println(json);
-            Data data = convertData.convertDataClass(json, Data.class);
-
-            return data;
+            var json = apiQuery.getData(url_base + "?search=" + book.replaceAll(" ", "+"));
+            Data bookInfo = convertData.convertDataClass(json, Data.class);
+            System.out.println(bookInfo);
+            return bookInfo;
         }
         private BooksData createBook(Books books, AuthorsData authorsData){
             BooksData booksData = new BooksData(books);
@@ -80,7 +79,7 @@ public class Main {
 
             if(!data.results().isEmpty()){
                 Books books = data.results().get(0);
-                Authors authors = books.authorsList().get(0);
+                Authors authors = books.authorsData().get(0);
                 BooksData booksDataDB = repository.findByTitle(books.title());
                 if (booksDataDB == null){
                     AuthorsData authorsData = new AuthorsData(authors);
@@ -92,7 +91,7 @@ public class Main {
                         AuthorsData authorsData = new AuthorsData(authors);
                         authorRepository.save(authorsData);
                         BooksData booksData = createBook(books, authorsData);
-                        System.out.println(booksDataDB);
+                        System.out.println(booksData);
                     }else{
                         BooksData booksData = createBook(books, authorsDataDB);
                         System.out.println(booksData);
@@ -102,7 +101,7 @@ public class Main {
         }
     private void showSearchedBooks(){
             booksDataList = repository.findAll();
-            booksDataList.stream().forEach(System.out::println);
+            booksDataList.forEach(System.out::println);
     }
     private void searchBookByAuthor(){
         System.out.println("Working in it");
@@ -112,15 +111,15 @@ public class Main {
         System.out.println("Search by encoded language: en, es, pt");
         var language = input.nextLine();
 
-        if (language == "es"){
-            List<BooksData> booksByLanguage = repository.findByLanguage(language);
-            booksByLanguage.stream().forEach(System.out::println);
-        }if (language == "en"){
-            List<BooksData> booksByLanguage = repository.findByLanguage(language);
-            booksByLanguage.stream().forEach(System.out::println);
-        }if(language == "pt"){
-            List<BooksData> booksByLanguage = repository.findByLanguage(language);
-            booksByLanguage.stream().forEach(System.out::println);
+        if (language.equals("es")){
+            List<BooksData> booksByLanguage = repository.findByLanguages(language);
+            booksByLanguage.forEach(System.out::println);
+        }if (language.equals("en")){
+            List<BooksData> booksByLanguage = repository.findByLanguages(language);
+            booksByLanguage.forEach(System.out::println);
+        }if(language.equals("pt")){
+            List<BooksData> booksByLanguage = repository.findByLanguages(language);
+            booksByLanguage.forEach(System.out::println);
         }else{
             System.out.println("Language not found");
         }

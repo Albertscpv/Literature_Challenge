@@ -1,28 +1,39 @@
 package com.albertdevproyects.literaturechallenge.models;
 
+import com.albertdevproyects.literaturechallenge.repository.BookRepository;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.persistence.*;
 
 import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "books")
-public class BooksData{
+public class BooksData  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     private String title;
 
     @Enumerated(EnumType.STRING)
-    private Language language;
+    private Languages languages;
 
     @ManyToOne
-    private AuthorsData authorsData;
+    private @JsonAlias("authors") AuthorsData authorsData;
 
     public BooksData(){}
 
     public BooksData(Books books) {
         this.title = books.title();
-        this.language = Language.fromString(books.languages().stream().limit(1).collect(Collectors.joining()));
+        this.languages = Languages.fromString(books.languages().stream().limit(1).collect(Collectors.joining()));
+    }
+
+    @Override
+    public String toString() {
+        return "BooksData{" +
+                ", title='" + title + '\'' +
+                ", languages=" + languages +
+                ", authorsData=" + authorsData +
+                '}';
     }
 
     public Long getId() {
@@ -41,12 +52,12 @@ public class BooksData{
         this.title = title;
     }
 
-    public Language getLanguage() {
-        return language;
+    public Languages getLanguage() {
+        return languages;
     }
 
-    public void setLanguage(Language language) {
-        this.language = language;
+    public void setLanguage(Languages language) {
+        this.languages = language;
     }
 
     public AuthorsData getAuthorsData() {
