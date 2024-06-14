@@ -9,4 +9,6 @@ A place to found a especial book.
 ### Is a Console app, that works with PostgreSQL to save the data.
 
 
-If something fail let me know about it.
+Right now with search book and searched books.
+
+Some features are in progress.
